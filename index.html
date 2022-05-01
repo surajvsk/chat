@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"/>
+    <!--<link rel="stylesheet" href="css/chat_style.css">-->
+	    <link rel="stylesheet" href="chat_style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/javascript-canvas-to-blob/3.4.0/js/canvas-to-blob.min.js"></script>
+    <title>Live Chat</title>
+<link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <div class="chat-container">
+        <header class="chat-header">
+           <h1 class="display-4" style="font-size: x-large;">Talk to me</h1>
+        </header>
+        <main class="chat-main">
+
+            <div class="chat-messages-area  ml-1">
+            </div>
+        </main>
+        <div class="chat-form-container">
+            <form id="chat-form">
+          <span class="attachmenticon" data-toggle="modal" data-target="#exampleModal">+</span>
+
+                <input id="msg" type="text" placeholder="Enter Message" class="form-control rounded-0" required autocomplete="off" />
+                <input class="btn btn-success rounded-0" id="send-message-btn" type="submit" value="Send">
+            </form>
+        </div>
+    </div>
+
+    <audio id="playMe">
+        <source src="audio/clearly-602.mp3" type="audio/mp3">
+    </audio>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-0">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Attach Media Files</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      <div class="row mb-4">
+        <div class="col-md-3">
+<div class="card">
+  <div class="card-body">
+    <input type="file" id="imageFile" onchange="encodeImageFileAsURL(this)">
+    <img id="display" src="" />
+
+  </div>
+</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary rounded-0" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary rounded-0 sendattchment">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+  </body>
+  <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+
+<script>
+
+     let socket = io();
+    const chatForm = document.getElementById('chat-form');
+    const chatMessages = document.querySelector('.chat-messages-area');
+  //  let username = prompt('Enter Your UserName')
+    localStorage.setItem('username','suraj')
+    chatForm.addEventListener('submit', e => {
+        e.preventDefault();
+
+        const message = e.target.elements.msg.value;
+        console.log(" --> ", message);
+
+
+        socket.emit('chat message', message, localStorage.getItem('username'));
+        //Clear input message box
+        e.target.elements.msg.value = '';
+        e.target.elements.msg.focus();
+
+
+        let replyMessage = `<div class="local-message ">`//document.createElement('div');
+         
+         replyMessage+= `<div class="message ml-3">`;
+        
+        
+         replyMessage += `<p class="meta">${localStorage.getItem('username')}<span></span></p><p class="text">${message}</p>`;
+         replyMessage += `<img src='https://cdn.pixabay.com/photo/2021/08/17/10/23/flowers-6552611__340.jpg' class='img-fluid'>`;
+         replyMessage += `</div></div>`;
+
+         $(".chat-messages-area").append(replyMessage)
+    })
+
+
+    socket.on('chat message', function(msg,username) {
+        let playMe =  document.getElementById("playMe")
+        playMe.play()
+
+            let replyMessage = `<div>`//document.createElement('div');
+         
+            replyMessage+= `<div class="message ml-3">`;
+           
+           
+            replyMessage += `<p class="meta">${username}<span></span></p><p class="text">${msg}</p>`;
+            replyMessage += `</div></div>`;
+
+            $(".chat-messages-area").append(replyMessage)
+        //document.querySelector('.chat-messages-area').appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+});
+
+let encodeImageFileAsURL=(element) => {
+  var file = element.files[0];
+  var reader = new FileReader();
+  reader.onloadend = function() {
+    console.log('RESULT', reader.result)
+  }
+  reader.readAsDataURL(file);
+  return reader.result
+}
+
+$('.sendattchment').on('click',function(){
+  let fileAttr = $('#imageFile').val()
+  console.log('fileAttr',encodeImageFileAsURL)
+})
+
+</script>
+</html>
